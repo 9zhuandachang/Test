@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>TitlePlaceholder</title>
+
+	<style>
+		#map {
+			height:  100%;
+		}
+
+		html,
+		body {
+			height:  100%;
+			margin:  0;
+			padding: 0;
+		}
+
+		PopupWindow {
+			height:  50%;
+			width: 	 100%;
+			font-style: italic;
+		}
+
+		div.container {
+			display: flex;
+			flex-direction: row;
+			height: 100vh;
+			width:  100vw;
+		}
+
+		div#map {
+			flex:   1;
+			height: 100vh;
+		}
+
+		div.sidebar {
+            /*position: fixed;*/
+			height: 100vh;
+			width:  calc(100px + 16vw);
+            top: 	0;
+            left: 	0;
+            overflow-y: scroll; /* V-scroll */
+
+			background-color: aliceblue;
+		}
+
+	</style>
+</head>
+
+<body>
+	<!-- Pange laoyut defined here -->
+
+	<div class="container">
+		<div class="sidebar" id="sideBar"></div>
+		<div id="map"></div>
+	</div>
+
+
+
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTrVkyhW4FWW4Grt6PLX8DzKpynjo_20Y&callback=initMap"
+		defer></script>
+
+	<script>
+		// The following example would produce five accessible and
+		// focusable markers.
+
+		// Sidebar
+		const sideBar = document.querySelector('#sideBar');
+
+			// Set LatLng and title text for the markers. The first marker (Placeholder1)
+			// receives the initial focus when tab is pressed. Use arrow keys to
+			// move between markers; press tab again to cycle through the map controls.
+
+		const PicAnchors = [
+			// Array to hold properties of pictures in this demo.
+			// TODO: Description string 
+			// {lat, lng}, title, description, img_url, id
+			[{ lat: 22.185412, lng: 113.556577 }, 'TitlePlaceholder1', 'file:///E:/Pictures/HMCatalog/Outputs/DSC00039.jpg', 'idstr_anchor1'],
+			[{ lat: 22.130968, lng: 113.581208 }, 'TitlePlaceholder2', 'file:///E:/Pictures/HMCatalog/Outputs/DSC01908.jpg', 'idstr_anchor2'],
+			[{ lat: 22.164634, lng: 113.548349 }, 'TitlePlaceholder3', 'file:///E:/Pictures/HMCatalog/Outputs/DSC00020.jpg', 'idstr_anchor3'],
+			[{ lat: 22.196503, lng: 113.549347 }, 'TitlePlaceholder4', 'file:///E:/Pictures/HMCatalog/Outputs/DSC00503.jpg', 'idstr_anchor4'],
+			[{ lat: 22.124019, lng: 113.571363 }, 'TitlePlaceholder5', 'file:///E:/Pictures/HMCatalog/Outputs/DSC00456.jpg', 'idstr_anchor5'],
+		];
+
+		function initMap() {
+			const map = new google.maps.Map(document.getElementById('map'), {
+				zoom: 14,
+				center: { lat: 22.167, lng: 113.555 },
+			});
+
+			// Create an info window to share between markers.
+			const infoWindow = new google.maps.InfoWindow({
+				maxWidth: 768,
+			});
+
+			// Create the markers.
+			PicAnchors.forEach(([position, title, ImgUrl, IDString], i) => {
+				const marker = new google.maps.Marker({
+					position,
+					//position: {lat: 1, lng: 1},
+					map,
+					title: `${title}`,
+					//label: `${i + 1}`,
+					optimized: false,
+					id: IDString
+				});
+				console.log(marker);	//
+
+				// Add a click listener for each marker, and set up the info window.
+				marker.addListener('click', () => {
+					ShowInfoWindow (marker.getMap(), infoWindow, marker, ImgUrl, IDString);
+				});
+
+				// Create corresponding image elements for the side bar
+				const image = document.createElement('img');
+				image.src 	= ImgUrl;
+				image.width	= sideBar.clientWidth - 1;
+				image.id	= IDString + 'Pic';
+/*
+				search "Resize image on window resizing" for the function which
+				resize pictures in sidebar on window size change. 
+*/
+				// Add a click listener for each image, and set up the info window.
+				image.addEventListener('click', () => {
+					ShowInfoWindow (marker.getMap(), infoWindow, marker, ImgUrl, IDString);
+				});
+				// Add the image to the sidebar.
+				sideBar.appendChild(image);
+
+			});
+		}
+
+
+		/* Line to initilize map */
+		window.initMap = initMap;
+
+		</script>
+
+		<script>
+		// The following block of script contains utility functions.
+
+		// Resize image on window resizing.
+		window.onresize = function(){	 
+// 		document.getElementById ('sideBar').width = Math.sqrt(window.innerWidth) + window.innerWidth * 0.1;
+//		↑ Not working. Implementation of this idea replaced by re-writing size property in css.
+			PicAnchors.forEach(([position, title, ImgUrl, IDString], i) => {
+				// resize images in sidebar
+				document.getElementById (IDString + 'Pic').width = sideBar.clientWidth - 1;
+			});
+		};
+
+		// Pop up an infowindow as well as perform Point of Interest data collection 
+		function ShowInfoWindow(map, infoWindow, marker, ImgUrl, AnchorIDStr) {
+			infoWindow.close(); // Close window if there's alreadly one
+
+			var contentString =
+				'<PopupWindow>' +
+				'<h2>' + marker.getTitle() + '<\h2>' +
+				'<a href = ' + ImgUrl + ' ' + 'target = "_blank" >' +
+				'<img src = ' + ImgUrl + ' ' + 'width = 320>' + '<\a>' +
+				'<font size = 2><br>Click to enlarge<font>' +
+				'<\PopupWindow>';
+			infoWindow.setContent(contentString);
+			infoWindow.open(map, marker);
+
+			// Process Point of Interest here
+		}
+	</script>
+</body>
+</html>
